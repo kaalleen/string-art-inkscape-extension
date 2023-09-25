@@ -287,14 +287,15 @@ class StringArt(EffectExtension):
         page_bbox = self.svg.get_page_bbox()
         font_size = 10
 
-        for _color, line_order in self.line_order.items():
+        for color, line_order in self.line_order.items():
             page = self._generate_new_page(page_bbox)
             page_num += 1
             page_bbox = page.bounding_box
 
             x_pos = page_bbox.left + 40
             y_pos = 20 + font_size
-            style = f"font-size:{ font_size }px;line-height:1;text-align: end;text-anchor: end;"
+            style = f"fill: { color };font-size:{ font_size }px;"
+            style += "line-height:1;text-align: end;text-anchor: end;"
             text_element = TextElement(x=str(x_pos), y=str(y_pos), style=style)
             text_element.set('xml:space', 'preserve')
             self.stringart_layer.append(text_element)
