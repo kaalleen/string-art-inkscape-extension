@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <name>Convert Image to String Art</name>
+  <id>org.kaalleen.stringart</id>
+  <param name="tabs" type="notebook">
+    <page name="settings-tab" gui-text="Settings">
+      <param name="stroke_width" type="float" min="0" max="10" indent="1" precision="2"
+             gui-text="Thread width"
+             gui-description="Thread width in document units">0.1</param>
+      <param name="num-lines" type="int" min="0" max="50000" indent="1"
+             gui-text="Number lines (per color)"
+             gui-description="0: runs until no improvement">0</param>
+      <param name="random_nails" type="int" min="0" max="5000" indent="1"
+             gui-text="Number of random nails to pick from for the next iteration"
+             gui-description="Speed up the algorithm at the cost of quality (0: looks at all 
+                possible nails every iteration; good value for this is ~50)">0</param>
+      <param name="nail-dist" type="int" min="1" max="100" indent="1"
+             gui-text="Approximate Nail distance"
+             gui-description="Distance between nails in document units.
+             Minimum possible value is 1">4</param>
+      <param name="wb" type="boolean" indent="1" gui-text="White on black">false</param>
+      <param name="shape" type="optiongroup" indent="1" appearance="combo"
+             gui-text="Shape">
+          <option value="circle">Circle</option>
+          <option value="ellipse">Ellipse</option>
+          <option value="rect">Rectangle</option>
+      </param>
+      <param name="color-mode" type="optiongroup" indent="1" appearance="combo"
+             gui-text="Color Mode">
+          <option value="black">Single Color</option>
+          <option value="rgb">Multicolor (RGB)</option>
+      </param>
+      <param name="output-nail-numbers" type="boolean" indent="1" gui-text="Insert Nail Numbers">false</param>
+      <param name="output-nail-order" type="boolean" indent="1" gui-text="Output Nail Order">false</param>
+    </page>
+    <page name="about-tab" gui-text="About">
+        <label>Converts an image into a creepy stringart vector graphic.</label>
+        <label>Detailed description:</label>
+        <label appearance="url">https://github.com/kaalleen/string-art-inkscape-extension</label>
+    </page>
+  </param>
+  <effect>
+    <object-type>all</object-type>
+      <effects-menu>
+        <submenu name="Images"/>
+      </effects-menu>
+  </effect>
+  <script>
+    <command location="inx" interpreter="python">stringart.py</command>
+  </script>
+</inkscape-extension>
