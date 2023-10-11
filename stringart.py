@@ -59,7 +59,7 @@ class StringArt(EffectExtension):
         # arguments
         pars.add_argument('-s', '--stroke_width', type=float, dest="stroke_width", default=0.1)
         pars.add_argument('-l', '--num-lines', type=int, dest="num_lines", default=0)
-        pars.add_argument('-r', '--random_nails', type=int, dest="random_nails", default=0)
+        pars.add_argument('-r', '--random-nails', type=int, dest="random_nails", default=0)
         pars.add_argument('-n', '--nail-dist', type=int, dest="nail_dist", default=4)
         pars.add_argument('--shape', type=str, dest="shape", default="circle")
         pars.add_argument('--wb', type=Boolean, dest="wb", default=False)
@@ -68,6 +68,7 @@ class StringArt(EffectExtension):
                           default=False)
         pars.add_argument('--output-nail-order', type=Boolean, dest="output_nail_order",
                           default=False)
+        pars.add_argument('-f', '--font-size', type=float, dest="font_size", default=5)
 
     def effect(self):
         images = [image for image in self.svg.selection if image.TAG == "image"]
@@ -285,14 +286,15 @@ class StringArt(EffectExtension):
     def _insert_nail_order_text(self):
         page_num = 1
         page_bbox = self.svg.get_page_bbox()
-        font_size = 10
+        font_size = self.options.font_size
+        x_offset = font_size * 5
 
         for color, line_order in self.line_order.items():
             page = self._generate_new_page(page_bbox)
             page_num += 1
             page_bbox = page.bounding_box
 
-            x_pos = page_bbox.left + 40
+            x_pos = page_bbox.left + x_offset
             y_pos = 20 + font_size
             style = f"fill: { color };font-size:{ font_size }px;"
             style += "line-height:1;text-align: end;text-anchor: end;"
@@ -306,18 +308,18 @@ class StringArt(EffectExtension):
                 text.set('sodipodi:role', 'line')
                 text_element.append(text)
 
-                y_pos += 10
+                y_pos += font_size
 
                 # give ti some extra space until inkex handles the text bounding boxes better
                 # or I handle units better
                 if text.bounding_box().bottom + 15 > page.bounding_box.bottom:
-                    x_pos += 50
+                    x_pos += x_offset + font_size
                     y_pos = 20 + font_size
 
                     if x_pos + 15 > page.bounding_box.right:
                         page = self._generate_new_page(page_bbox)
                         page_bbox = page.bounding_box
-                        x_pos += 20
+                        x_pos = page_bbox.left + x_offset
 
                     text_element = TextElement(x=str(x_pos), y=str(y_pos), style=style)
                     self.stringart_layer.append(text_element)
@@ -360,16 +362,27 @@ def find_best_nail_position(prev_nail,  # pylint: disable=too-many-arguments, to
     best_nail_position = None
     best_nail_idx = None
 
-    if random_nails != 0:
-        nail_ids = np.random.choice(range(len(nails)), size=random_nails, replace=False)
-        nails_and_ids = list(zip(nail_ids, nails[nail_ids]))
+    nail_options = list(range(len(nails)))
+
+    if len(nails > 20) and random_nails == 0 or random_nails > 20:
+        for i in range(prev_nail - 5, prev_nail + 5):
+            if i >= len(nails):
+                i -= len(nails)
+            if i < 0:
+                i = len(nails) - i - 1
+        if i in nail_options:
+            nail_options.remove(i)
     else:
-        nails_and_ids = enumerate(nails)
+        nail_options.remove(prev_nail)
+
+    if random_nails != 0:
+        nail_ids = np.random.choice(nail_options, size=random_nails, replace=False)
+    else:
+        nail_ids = nail_options
+
+    nails_and_ids = list(zip(nail_ids, nails[nail_ids]))
 
     for nail_idx, nail_position in nails_and_ids:
-        if nail_idx == prev_nail:
-            continue
-
         overlayed_line, rows, columns = get_aa_line(
             current_position,
             nail_position,
